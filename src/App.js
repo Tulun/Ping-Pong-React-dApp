@@ -17,7 +17,8 @@ const web3 = new Web3(window.web3.currentProvider);
 class App extends Component {
   state = {
     name: "",
-    nameHexcode: ""
+    nameHexcode: "",
+    players: []
   };
 
   async componentDidMount() {
@@ -25,6 +26,12 @@ class App extends Component {
     const numPlayers = await leaderboard.methods.totalNumPlayers().call();
     console.log('p2', playerTwo);
     console.log('# players', numPlayers)
+    for (let i=0; i < numPlayers; i++) {
+      const player = await leaderboard.methods.players(i).call();
+      this.setState({
+        players: [...this.state.players, player]
+      });
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -40,6 +47,12 @@ class App extends Component {
 
       this.setState({ nameHexcode })
     }
+
+    if(this.state.players != prevState.players) {
+
+    }
+
+    console.log('players', this.state.players);
   }
   render() {
     return (
@@ -50,6 +63,38 @@ class App extends Component {
           </div>
         </div>
         <hr />
+        <div className="row">
+          <div className="col-xs-12 col-sm-12 col-md-12">
+            {this.state.players.length && 
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Wins</th>
+                    <th scope="col">Ties</th>
+                    <th scope="col">Disputed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.players.map( (player, index) => {
+                    return (
+                      <tr key={index}>
+                        <th scope="row">{index}</th>
+                        <th scope="col">{player.name}</th>
+                        <th scope="col">{player.playerAddress}</th>
+                        <th scope="col">{player.wins}</th>
+                        <th scope="col">{player.losses}</th>
+                        <th scope="col">{player.numDisputedGames}</th>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            }
+          </div>
+        </div>
         <div className="row">
           <div className="col-xs-12 col-sm-12 col-md-12">
             <div className="form-group">
