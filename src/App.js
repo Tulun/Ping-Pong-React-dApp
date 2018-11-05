@@ -1,37 +1,72 @@
+// Dependencies
 import React, { Component } from 'react';
-import './App.css';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 import Web3 from 'web3';
-
 import EthereumQRPlugin from 'ethereum-qr-code';
 import QRCode from 'qrcode.react';
 
+// Styles
+import './App.css';
+
+// Contract
 import leaderboard from './leaderboard';
+
 const qr = new EthereumQRPlugin()
 const web3 = new Web3(window.web3.currentProvider);
 
 class App extends Component {
   state = {
-    value: ""
+    name: "",
+    nameHexcode: ""
   };
-  async componentDidMount() {
-    console.log('web3', web3);
-    console.log('lb', leaderboard);
-    console.log(web3.eth.abi.encodeFunctionCall({
-      name: "addPlayerToLeaderboard",
-      type: "function",
-      inputs: [{
-        type: 'string',
-        name: 'name'
-      }]
-    },["Jason"]));
 
-    console.log(await leaderboard.methods.players(0).call())
+  async componentDidMount() {
+    const playerTwo = await leaderboard.methods.players(1).call();
+    const numPlayers = await leaderboard.methods.totalNumPlayers().call();
+    console.log('p2', playerTwo);
+    console.log('# players', numPlayers)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.name != prevState.name) {
+      const nameHexcode = web3.eth.abi.encodeFunctionCall({
+        name: "addPlayerToLeaderboard",
+        type: "function",
+        inputs: [{
+          type: 'string',
+          name: 'name'
+        }]
+      },[this.state.name]);
+
+      this.setState({ nameHexcode })
+    }
   }
   render() {
     return (
-      <div className="App">
-        <h2>Ping Pong Tester</h2>
-        <QRCode id="qrcode" value={this.state.value} />
+      <div className="App container">
+        <div className="row">
+          <div className="col-xs-12 col-sm-12 col-md-12">
+            <h2>Ping Pong Tester</h2>
+          </div>
+        </div>
+        <hr />
+        <div className="row">
+          <div className="col-xs-12 col-sm-12 col-md-12">
+            <div className="form-group">
+              <label>Enter Leaderboard:</label>
+              <input className="form-control" onChange={(event) => {
+                this.setState({ name: event.target.value })
+              }}
+              value={this.state.name} />
+            </div>
+          </div>
+        </div>
+        <div>
+          <CopyToClipboard text={this.state.nameHexcode}
+            onCopy={() => this.setState({copied: true})}>
+            <button className="btn btn-primary">Copy Leaderboard Hexcode</button>
+          </CopyToClipboard>
+        </div>
       </div>
     );
   }
