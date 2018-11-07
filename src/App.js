@@ -18,14 +18,26 @@ class App extends Component {
   state = {
     name: "",
     nameHexcode: "",
-    players: []
+    players: [],
+    gameInProgress: false
   };
 
   async componentDidMount() {
-    const playerTwo = await leaderboard.methods.players(1).call();
+    console.log(web3.eth.abi);
     const numPlayers = await leaderboard.methods.totalNumPlayers().call();
-    console.log('p2', playerTwo);
-    console.log('# players', numPlayers)
+    const gameInProgress = await leaderboard.methods.gameInProgress().call();
+    console.log(gameInProgress);
+    this.setState({ gameInProgress });
+    // watch game progress changes
+    console.log(leaderboard.events);
+    // const gameInProgressEvent = leaderboard.UpdateGameInProgress({}, {fromBlock: "0", toBlock: "latest"});
+    // gameInProgressEvent.watch((error, result) => {
+    //   if(!error) {
+    //     console.log('result', result)
+    //   } else {
+    //     console.log('err', error)
+    //   }
+    // })
     for (let i=0; i < numPlayers; i++) {
       const player = await leaderboard.methods.players(i).call();
       this.setState({
@@ -48,11 +60,6 @@ class App extends Component {
       this.setState({ nameHexcode })
     }
 
-    if(this.state.players != prevState.players) {
-
-    }
-
-    console.log('players', this.state.players);
   }
   render() {
     return (
@@ -60,6 +67,7 @@ class App extends Component {
         <div className="row">
           <div className="col-xs-12 col-sm-12 col-md-12">
             <h2>Ping Pong Tester</h2>
+            <h3>Game In Progress: {`${this.state.gameInProgress}`}</h3>
           </div>
         </div>
         <hr />
@@ -110,6 +118,19 @@ class App extends Component {
           <CopyToClipboard text={this.state.nameHexcode}
             onCopy={() => this.setState({copied: true})}>
             <button className="btn btn-primary">Copy Leaderboard Hexcode</button>
+          </CopyToClipboard>
+        </div>
+        <div className="row">
+          <div className="col-xs-12 col-sm-12 col-md-12">
+            <div className="form-group">
+              <label>Create Game:</label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <CopyToClipboard text={web3.eth.abi.encodeFunctionSignature("createGame()")}
+            onCopy={() => this.setState({copied: true})}>
+            <button className="btn btn-primary">Copy Create Game Hexcode</button>
           </CopyToClipboard>
         </div>
       </div>
