@@ -30,7 +30,14 @@ class App extends Component {
     this.setState({ gameInProgress });
     // watch game progress changes
     console.log(leaderboard.events);
-    // const gameInProgressEvent = leaderboard.UpdateGameInProgress({}, {fromBlock: "0", toBlock: "latest"});
+    const gameInProgressEvent = leaderboard.events.UpdateGameProgress({}, {fromBlock: "0", toBlock: "latest"}, (error, result) => {
+      if(!error) {
+        console.log('result', result)
+      } else {
+        console.log('err', error)
+      }
+    })
+    console.log(gameInProgressEvent);
     // gameInProgressEvent.watch((error, result) => {
     //   if(!error) {
     //     console.log('result', result)
