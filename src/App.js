@@ -4,6 +4,7 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import Web3 from 'web3';
 import EthereumQRPlugin from 'ethereum-qr-code';
 import QRCode from 'qrcode.react';
+import contractAddress from './address';
 
 // Styles
 import './App.css';
@@ -19,7 +20,7 @@ class App extends Component {
     name: "",
     nameHexcode: "",
     players: [],
-    gameInProgress: false
+    gameInProgress: false,
   };
 
   async componentDidMount() {
@@ -28,23 +29,26 @@ class App extends Component {
     const gameInProgress = await leaderboard.methods.gameInProgress().call();
     console.log(gameInProgress);
     this.setState({ gameInProgress });
+    
     // watch game progress changes
-    console.log(leaderboard.events);
-    const gameInProgressEvent = leaderboard.events.UpdateGameProgress({}, {fromBlock: "0", toBlock: "latest"}, (error, result) => {
+    leaderboard.events.allEvents({fromBlock: `0`, toBlock: "latest"}, async (error, result) => {
       if(!error) {
-        console.log('result', result)
+        console.log('result', result);
+        if (result.event === "UpdateGameProgress") {
+          return this.setState({ gameInProgress: result.returnValues[0] });
+        };
+
+        if (result.event === "PlayerUpdated") {
+          const players = this.state.players;
+          const player = await leaderboard.methods.players(result.returnValues[0]).call();
+          players[result.returnValues[0]] = player;
+
+          return this.setState({ players });
+        }
       } else {
         console.log('err', error)
       }
-    })
-    console.log(gameInProgressEvent);
-    // gameInProgressEvent.watch((error, result) => {
-    //   if(!error) {
-    //     console.log('result', result)
-    //   } else {
-    //     console.log('err', error)
-    //   }
-    // })
+    });
     for (let i=0; i < numPlayers; i++) {
       const player = await leaderboard.methods.players(i).call();
       this.setState({
@@ -74,6 +78,7 @@ class App extends Component {
         <div className="row">
           <div className="col-xs-12 col-sm-12 col-md-12">
             <h2>Ping Pong Tester</h2>
+            <h3>Contract Address: {contractAddress}</h3>
             <h3>Game In Progress: {`${this.state.gameInProgress}`}</h3>
           </div>
         </div>
