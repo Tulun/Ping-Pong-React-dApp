@@ -21,6 +21,7 @@ class App extends Component {
     nameHexcode: "",
     players: [],
     gameInProgress: false,
+    game: {}
   };
 
   async componentDidMount() {
@@ -49,15 +50,15 @@ class App extends Component {
         console.log('err', error)
       }
     });
-    for (let i=0; i < numPlayers; i++) {
-      const player = await leaderboard.methods.players(i).call();
-      this.setState({
-        players: [...this.state.players, player]
-      });
-    }
+    // for (let i=0; i < numPlayers; i++) {
+    //   const player = await leaderboard.methods.players(i).call();
+    //   this.setState({
+    //     players: [...this.state.players, player]
+    //   });
+    // }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     if (this.state.name != prevState.name) {
       const nameHexcode = web3.eth.abi.encodeFunctionCall({
         name: "addPlayerToLeaderboard",
@@ -69,6 +70,12 @@ class App extends Component {
       },[this.state.name]);
 
       this.setState({ nameHexcode })
+    }
+
+    if (this.state.gameInProgress && !prevState.gameInProgress) {
+      const game = await leaderboard.methods.game().call();
+      this.setState({ game });
+      console.log('game', game);
     }
 
   }
@@ -145,6 +152,22 @@ class App extends Component {
             <button className="btn btn-primary">Copy Create Game Hexcode</button>
           </CopyToClipboard>
         </div>
+        {this.state.gameInProgress ? 
+          <div className="row">
+            <div className="col-xs-12 col-sm-12 col-md-12">
+              <h2>Current Game</h2>
+              <ul className="list-group">
+                <li className="list-group-item" scope="row">ID: {this.state.game.id}</li>
+                <li className="list-group-item" scope="col">Player One: {this.state.game.firstPlayer}</li>
+                <li className="list-group-item" scope="col">Player Two: {this.state.game.secondPlayer}</li>
+                <li className="list-group-item" scope="col">Bet: {this.state.game.bet}</li>
+                <li className="list-group-item" scope="col">Pot: {this.state.game.pot}</li>
+                <li className="list-group-item" scope="col">P1 Declared Winner: {this.state.game.declaredWinnerFirstPlayer}</li>
+                <li className="list-group-item" scope="col">P2 Declared Winner: {this.state.game.declaredWinnerSecondPlayer}</li>
+              </ul>
+            </div>
+          </div>
+        : null}
       </div>
     );
   }
