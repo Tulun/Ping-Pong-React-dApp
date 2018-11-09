@@ -26,9 +26,7 @@ class App extends Component {
 
   async componentDidMount() {
     console.log(web3.eth.abi);
-    const numPlayers = await leaderboard.methods.totalNumPlayers().call();
     const gameInProgress = await leaderboard.methods.gameInProgress().call();
-    console.log(gameInProgress);
     this.setState({ gameInProgress });
     
     // watch game progress changes
@@ -50,12 +48,7 @@ class App extends Component {
         console.log('err', error)
       }
     });
-    // for (let i=0; i < numPlayers; i++) {
-    //   const player = await leaderboard.methods.players(i).call();
-    //   this.setState({
-    //     players: [...this.state.players, player]
-    //   });
-    // }
+
   }
 
   async componentDidUpdate(prevProps, prevState) {
@@ -157,13 +150,13 @@ class App extends Component {
             <div className="col-xs-12 col-sm-12 col-md-12">
               <h2>Current Game</h2>
               <ul className="list-group">
-                <li className="list-group-item" scope="row">ID: {this.state.game.id}</li>
-                <li className="list-group-item" scope="col">Player One: {this.state.game.firstPlayer}</li>
-                <li className="list-group-item" scope="col">Player Two: {this.state.game.secondPlayer}</li>
-                <li className="list-group-item" scope="col">Bet: {this.state.game.bet}</li>
-                <li className="list-group-item" scope="col">Pot: {this.state.game.pot}</li>
-                <li className="list-group-item" scope="col">P1 Declared Winner: {this.state.game.declaredWinnerFirstPlayer}</li>
-                <li className="list-group-item" scope="col">P2 Declared Winner: {this.state.game.declaredWinnerSecondPlayer}</li>
+                <li className="list-group-item">ID: {this.state.game.id}</li>
+                <li className="list-group-item">Player One: {this.state.game.firstPlayer}</li>
+                <li className="list-group-item">Player Two: {this.state.game.secondPlayer}</li>
+                <li className="list-group-item">Bet: {this.state.game.bet}</li>
+                <li className="list-group-item">Pot: {this.state.game.pot}</li>
+                <li className="list-group-item">P1 Declared Winner: {this.state.game.declaredWinnerFirstPlayer}</li>
+                <li className="list-group-item">P2 Declared Winner: {this.state.game.declaredWinnerSecondPlayer}</li>
               </ul>
             </div>
           </div>
